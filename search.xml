@@ -4,13 +4,25 @@
   
     
     <entry>
-      <title>hello world</title>
+      <title>Hello World!</title>
       <link href="/2023/04/03/hello-world/"/>
       <url>/2023/04/03/hello-world/</url>
       
-        <content type="html"><![CDATA[<h2 id="Welcome-to-zhangdan’s-blog"><a href="#Welcome-to-zhangdan’s-blog" class="headerlink" title="Welcome to zhangdan’s blog"></a>Welcome to zhangdan’s blog</h2>]]></content>
+        <content type="html"><![CDATA[<p>-</p><h2 id="Welcome-to-zhangdan’s-blog"><a href="#Welcome-to-zhangdan’s-blog" class="headerlink" title="Welcome to zhangdan’s blog"></a>Welcome to zhangdan’s blog</h2>]]></content>
       
       
+      <categories>
+          
+          <category> hexo </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> hexo </tag>
+            
+        </tags>
       
     </entry>
     
