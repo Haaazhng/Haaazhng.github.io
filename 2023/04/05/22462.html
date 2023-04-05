@@ -544,7 +544,7 @@ input [3:0] func,        &#x2F;&#x2F;操作功能（加、减、与、或、异�
 output [WIDTH-1:0] y,    &#x2F;&#x2F;运算结果（和、差 …）
 output of                &#x2F;&#x2F;溢出标志of，加减法结果溢出时置1
 );<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>ALU所实现的<strong>功能</strong>：<br><img src="grid.png" alt="功能表"></p>
+<p>ALU所实现的<strong>功能</strong>：<br><img src="./images/grid.png" alt="功能表"></p>
 <p>可以直接通过组合逻辑<strong>实现：</strong></p>
 <pre class="line-numbers language-Verilog" data-language="Verilog"><code class="language-Verilog">module alu #(parameter WIDTH &#x3D; 6) (
     input [WIDTH-1:0] a, b,     &#x2F;&#x2F;两操作数（对于减运算，a是被减数）
@@ -715,9 +715,9 @@ end
 
 endmodule<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 
-<h3 id="仿真结果"><a href="#仿真结果" class="headerlink" title="仿真结果"></a><span id="3.2">仿真结果</span></h3><p>加法模式：<br><img src="plus.png" alt="加法模式仿真截图"></p>
-<p>减法模式：<br><img src="minus.png" alt="减法模式仿真截图"></p>
-<p>异或模式:<br><img src="xor.png" alt="异或模式仿真截图"></p>
+<h3 id="仿真结果"><a href="#仿真结果" class="headerlink" title="仿真结果"></a><span id="3.2">仿真结果</span></h3><p>加法模式：<br><img src="./images/plus.png" alt="加法模式仿真截图"></p>
+<p>减法模式：<br><img src="./images/minus.png" alt="减法模式仿真截图"></p>
+<p>异或模式:<br><img src="./images/xor.png" alt="异或模式仿真截图"></p>
 <p>其他工作模式自行测试！</p>
 <h2 id="FPGA烧写"><a href="#FPGA烧写" class="headerlink" title="FPGA烧写"></a><span id = "4">FPGA烧写</span></h2><p><strong>约束文件：</strong></p>
 <pre class="line-numbers language-V" data-language="V"><code class="language-V">## This file is a general .xdc for FPGAOL_BOARD (adopted from Nexys4 DDR Rev. C)
