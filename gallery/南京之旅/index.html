@@ -1621,27 +1621,6 @@
         async:false,//是否异步加载文件。
     });
 
-    start()
-        $(window).on('scroll', function(){
-        start();
-    })
-
-    function start(){
-          //.not('[data-isLoaded]')选中已加载的图片不需要重新加载
-        $('.gallery img').not('[data-isLoaded]').each(function(){
-            var $node = $(this)
-            if( isShow($node) ){
-
-            }
-        });
-    }
-
-    //判断一个元素是不是出现在窗口(视野)
-    function isShow($node){
-        return $node.offset().top <= $(window).height() + $(window).scrollTop();
-    }
-    //加载图片
-
 </script>
 
 
