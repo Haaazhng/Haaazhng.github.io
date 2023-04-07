@@ -447,7 +447,7 @@
     <script src="/libs/cryptojs/crypto-js.min.js"></script>
     <script>
         (function() {
-            let pwd = 'c62457e0d2a4f0a0ec1ac0942f2321ead80d89cce0df684451e81dd7890e0912';
+            let pwd = 'c28b39301e7e776610caa863459bf05c4fc9890471d9c77ad061253930dc36ff';
 
             if (pwd && pwd.length > 0) {
                 if (pwd !== CryptoJS.SHA256(prompt('该相册已加密，请输入密码访问')).toString(CryptoJS.enc.Hex)) {
@@ -1621,6 +1621,32 @@
         async:false,//是否异步加载文件。
     });
 
+    start()
+        $(window).on('scroll', function(){
+        start();
+    })
+
+    function start(){
+          //.not('[data-isLoaded]')选中已加载的图片不需要重新加载
+        $('.gallery img').not('[data-isLoaded]').each(function(){
+            var $node = $(this)
+            if( isShow($node) ){
+                loadImg($node);
+            }
+        });
+    }
+
+    //判断一个元素是不是出现在窗口(视野)
+    function isShow($node){
+        return $node.offset().top <= $(window).height() + $(window).scrollTop();
+    }
+    //加载图片
+    function loadImg($img){
+    //.attr(值)
+    //.attr(属性名称,值)
+        $img.attr('src', $img.attr('data-src')); //把data-src的值 赋值给src
+        $img.attr('data-isLoaded', 1);//已加载的图片做标记
+    }
 </script>
 
 
