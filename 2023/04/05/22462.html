@@ -29,7 +29,8 @@
 
     <script src="https://cdn.jsdelivr.net/gh/Haaazhng/Haaazhng.github.io/libs/jquery/jquery.min.js"></script>
 
-<meta name="generator" content="Hexo 5.4.2"><link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css"></head>
+<meta name="generator" content="Hexo 5.4.2"><link rel="stylesheet" href="/css/prism-tomorrow.css" type="text/css">
+<link rel="stylesheet" href="/css/prism-line-numbers.css" type="text/css"></head>
 
 
 
@@ -516,14 +517,14 @@
                 
                 <div class="info-break-policy">
                     <i class="far fa-file-word fa-fw"></i>文章字数:&nbsp;&nbsp;
-                    1.7k
+                    223
                 </div>
                 
 
                 
                 <div class="info-break-policy">
                     <i class="far fa-clock fa-fw"></i>阅读时长:&nbsp;&nbsp;
-                    8 分
+                    1 分
                 </div>
                 
 
@@ -538,124 +539,122 @@
         <hr class="clearfix">
 
         
-        <!-- 是否加载使用自带的 prismjs. -->
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Haaazhng/Haaazhng.github.io/libs/prism/prism.css">
-        
 
         
 
         <div class="card-content article-card-content">
             <div id="articleContent">
                 <h2 id="1-ALU的实现"><a href="#1-ALU的实现" class="headerlink" title="1.ALU的实现"></a><a href="#1">1.ALU的实现</a></h2><h2 id="2-实现多工作模式的FLS"><a href="#2-实现多工作模式的FLS" class="headerlink" title="2.实现多工作模式的FLS"></a><a href="#2">2.实现多工作模式的FLS</a></h2><h2 id="3-仿真"><a href="#3-仿真" class="headerlink" title="3.仿真"></a><a href="#3">3.仿真</a></h2><h3 id="3-1-仿真代码"><a href="#3-1-仿真代码" class="headerlink" title="3.1.仿真代码"></a><a href="#3.1">3.1.仿真代码</a></h3><h3 id="3-2-仿真结果"><a href="#3-2-仿真结果" class="headerlink" title="3.2.仿真结果"></a><a href="#3.2">3.2.仿真结果</a></h3><h2 id="4-FPGA烧写"><a href="#4-FPGA烧写" class="headerlink" title="4.FPGA烧写"></a><a href="#4">4.FPGA烧写</a></h2><h2 id="ALU的实现"><a href="#ALU的实现" class="headerlink" title="ALU的实现"></a><span id="1">ALU的实现</span></h2><p><strong>ALU端口定义：</strong></p>
-<pre class="line-numbers language-Verilog" data-language="Verilog"><code class="language-Verilog">module alu #(parameter WIDTH &#x3D; 6） &#x2F;&#x2F;数据宽度
+<pre class="line-numbers language-Verilog"><code class="language-Verilog">module alu #(parameter WIDTH = 6） //数据宽度
 (
-input [WIDTH-1:0] a, b,  &#x2F;&#x2F;两操作数（对于减运算，a是被减数）
-input [3:0] func,        &#x2F;&#x2F;操作功能（加、减、与、或、异或等）
-output [WIDTH-1:0] y,    &#x2F;&#x2F;运算结果（和、差 …）
-output of                &#x2F;&#x2F;溢出标志of，加减法结果溢出时置1
-);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+input [WIDTH-1:0] a, b,  //两操作数（对于减运算，a是被减数）
+input [3:0] func,        //操作功能（加、减、与、或、异或等）
+output [WIDTH-1:0] y,    //运算结果（和、差 …）
+output of                //溢出标志of，加减法结果溢出时置1
+);
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p>ALU所实现的<strong>功能</strong>：</p>
 <img src="/2023/04/05/22462/grid.png" class title="ALU功能图">
 
 <p>可以直接通过组合逻辑<strong>实现：</strong></p>
-<pre class="line-numbers language-Verilog" data-language="Verilog"><code class="language-Verilog">module alu #(parameter WIDTH &#x3D; 6) (
-    input [WIDTH-1:0] a, b,     &#x2F;&#x2F;两操作数（对于减运算，a是被减数）
-    input [3:0] func,           &#x2F;&#x2F;操作功能（加、减、与、或、异或等）
-    output reg [WIDTH-1:0] y,       &#x2F;&#x2F;运算结果（和、差 …）
+<pre class="line-numbers language-Verilog"><code class="language-Verilog">module alu #(parameter WIDTH = 6) (
+    input [WIDTH-1:0] a, b,     //两操作数（对于减运算，a是被减数）
+    input [3:0] func,           //操作功能（加、减、与、或、异或等）
+    output reg [WIDTH-1:0] y,       //运算结果（和、差 …）
     output reg of
 );
 
 wire [WIDTH-1:0] minus_b;
-assign minus_b&#x3D;~b+1;    &#x2F;&#x2F;a-b&#x3D;a+(-b)
+assign minus_b=~b+1;    //a-b=a+(-b)
 
 always @(*) begin
     case(func)
-        4&#39;b0000:y&#x3D;a+b;
-        4&#39;b0001:y&#x3D;a-b;
-        4&#39;b0010:y&#x3D;(a&#x3D;&#x3D;b? 1:0);
-        4&#39;b0011:y&#x3D;(a&lt;b? 1:0);
-        4&#39;b0100:y&#x3D;($signed (a) &lt; $signed (b) ? 1:0) ;
-        4&#39;b0101:y&#x3D;a&amp;b;
-        4&#39;b0110:y&#x3D;a|b;
-        4&#39;b0111:y&#x3D;a^b;
-        4&#39;b1000:y&#x3D;a&gt;&gt;b;
-        4&#39;b1001:y&#x3D;a&lt;&lt;b;
-        default:y&#x3D;0;
+        4'b0000:y=a+b;
+        4'b0001:y=a-b;
+        4'b0010:y=(a==b? 1:0);
+        4'b0011:y=(a<b? 1:0);
+        4'b0100:y=($signed (a) < $signed (b) ? 1:0) ;
+        4'b0101:y=a&b;
+        4'b0110:y=a|b;
+        4'b0111:y=a^b;
+        4'b1000:y=a>>b;
+        4'b1001:y=a<<b;
+        default:y=0;
     endcase
 end
 always @(*) begin
-    if(func&#x3D;&#x3D;0)begin        &#x2F;&#x2F;加法运算溢出讨论
-        if(a[WIDTH-1]&#x3D;&#x3D;b[WIDTH-1] &amp;&amp; a[WIDTH-1]^y[WIDTH-1])
-            of&#x3D;1;
-        else of&#x3D;0; 
+    if(func==0)begin        //加法运算溢出讨论
+        if(a[WIDTH-1]==b[WIDTH-1] && a[WIDTH-1]^y[WIDTH-1])
+            of=1;
+        else of=0; 
     end
-    else if(func&#x3D;&#x3D;1) begin      &#x2F;&#x2F;减法运算溢出讨论
-        if(a[WIDTH-1]&#x3D;&#x3D;minus_b[WIDTH-1] &amp;&amp; a[WIDTH-1]^y[WIDTH-1])
-            of&#x3D;1;
-        else of&#x3D;0; 
+    else if(func==1) begin      //减法运算溢出讨论
+        if(a[WIDTH-1]==minus_b[WIDTH-1] && a[WIDTH-1]^y[WIDTH-1])
+            of=1;
+        else of=0; 
     end
-    else of&#x3D;0;
+    else of=0;
 end
-endmodule<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-
+endmodule
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h2 id="实现多工作模式的FLS"><a href="#实现多工作模式的FLS" class="headerlink" title="实现多工作模式的FLS"></a><span id="2">实现多工作模式的FLS</span></h2><p>代码严格遵循三段式有限状态机描述。<br>先给出具体实现：</p>
-<pre class="line-numbers language-Verilog" data-language="Verilog"><code class="language-Verilog">&#96;timescale 1ns &#x2F; 1ps
+<pre class="line-numbers language-Verilog"><code class="language-Verilog">`timescale 1ns / 1ps
 
 module fls(
-    input clk, rst, &#x2F;&#x2F;时钟，复位（高电平有效）
-    input en, &#x2F;&#x2F;输入输出使能
-    input [6:0] d, &#x2F;&#x2F;输入数列初始项
-    output [6:0] f, &#x2F;&#x2F;输出数列
-    output reg of       &#x2F;&#x2F;溢出
+    input clk, rst, //时钟，复位（高电平有效）
+    input en, //输入输出使能
+    input [6:0] d, //输入数列初始项
+    output [6:0] f, //输出数列
+    output reg of       //溢出
     );
     reg [3:0] func_cs,func_ns;
     reg [1:0] curr_state, next_state;
-    reg [6:0] f_ls, f_cs, f_ns;     &#x2F;&#x2F;F(n-1),F(n),F(n+1)
-    wire [6:0] y;           &#x2F;&#x2F;ALU输出端口
+    reg [6:0] f_ls, f_cs, f_ns;     //F(n-1),F(n),F(n+1)
+    wire [6:0] y;           //ALU输出端口
     wire of_state;
     reg en_cs, en_ns;
     always @(posedge clk) begin
         if(rst) begin
-            curr_state&lt;&#x3D;0;
+            curr_state<=0;
         end
-        else if(en_ns&#x3D;&#x3D;1 &amp;&amp; en_cs&#x3D;&#x3D;0)begin  &#x2F;&#x2F;每按下一次button
-            curr_state&lt;&#x3D;next_state;
+        else if(en_ns==1 && en_cs==0)begin  //每按下一次button
+            curr_state<=next_state;
         end
     end
 
     always @(*) begin
-        en_ns&#x3D;en;
-        func_ns&#x3D;func_cs;
+        en_ns=en;
+        func_ns=func_cs;
         case(curr_state)
         0:begin
-            next_state&#x3D;1;f_ns&#x3D;0;func_ns&#x3D;d[3:0]; &#x2F;&#x2F;工作模式输入
+            next_state=1;f_ns=0;func_ns=d[3:0]; //工作模式输入
         end
         1:begin
-            next_state&#x3D;2;f_ns&#x3D;d;        &#x2F;&#x2F;第一项输入
+            next_state=2;f_ns=d;        //第一项输入
         end
         2:begin
-            next_state&#x3D;3;f_ns&#x3D;d;        &#x2F;&#x2F;第二项输入
+            next_state=3;f_ns=d;        //第二项输入
         end
         default:begin
-            next_state&#x3D;3;f_ns&#x3D;y;        &#x2F;&#x2F;第二项之后的项
+            next_state=3;f_ns=y;        //第二项之后的项
         end
         endcase
     end
 
         always @(posedge clk) begin
         if(rst) begin
-            f_cs&lt;&#x3D;0;
-            f_ls&lt;&#x3D;0;
-            en_cs&lt;&#x3D;0;
+            f_cs<=0;
+            f_ls<=0;
+            en_cs<=0;
         end
-        else if(en_ns&#x3D;&#x3D;1 &amp;&amp; en_cs&#x3D;&#x3D;0)begin  &#x2F;&#x2F;每按下一次button
-            f_ls&lt;&#x3D;f_cs;
-            f_cs&lt;&#x3D;f_ns;
-            en_cs&lt;&#x3D;en_ns;
-            func_cs&lt;&#x3D;func_ns;
-            of&lt;&#x3D;of_state;
+        else if(en_ns==1 && en_cs==0)begin  //每按下一次button
+            f_ls<=f_cs;
+            f_cs<=f_ns;
+            en_cs<=en_ns;
+            func_cs<=func_ns;
+            of<=of_state;
         end
-        else en_cs&lt;&#x3D;en_ns;
+        else en_cs<=en_ns;
     end
 
     alu #(7) alu_inst(
@@ -666,43 +665,42 @@ module fls(
         .of(of_state)
     );
 
-    assign f&#x3D;f_cs;
+    assign f=f_cs;
 
 endmodule
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-
 <p>我们通过分时复用依次输入func、FLS的前两项，之后状态机会一直工作在S3（状态编号3）:F(n)&#x3D;F(n-1)+F(n-2)。每按下一次en更新一次状态。rst为高电平时同步复位，状态回到S0。</p>
 <h2 id="仿真"><a href="#仿真" class="headerlink" title="仿真"></a><span id="3">仿真</span></h2><h3 id="仿真代码"><a href="#仿真代码" class="headerlink" title="仿真代码"></a><span id="3.1">仿真代码</span></h3><p>vscode上编写好设计文件后，可以通过testbench插件（需要Python3的支持）快速生成仿真文件，可以将自动生成的内容复制到tb文件中。</p>
 <img src="/2023/04/05/22462/tb.png" class title="testbench截图">
 
 <p><strong>注意：</strong> 生成的内容只是帮你创建和初始化了端口变量，并例化了模块，真正的测试内容需要自行添加。<br>插件只是帮你完成一些必需且繁琐的步骤，它并不会知道你想如何测试。所以你们可以自行添加一些测试数据，以下是一个示例：</p>
-<pre class="line-numbers language-Verilog" data-language="Verilog"><code class="language-Verilog">&#96;timescale  1ns &#x2F; 1ps
+<pre class="line-numbers language-Verilog"><code class="language-Verilog">`timescale  1ns / 1ps
 
 module tb_fls();
 
-&#x2F;&#x2F; fls Parameters
-parameter PERIOD  &#x3D; 10;
+// fls Parameters
+parameter PERIOD  = 10;
 
 
-&#x2F;&#x2F; fls Inputs
-reg   clk                                  &#x3D; 0 ;
-reg   rst                                  &#x3D; 1 ;    &#x2F;&#x2F;先重置刀状态0
-reg   en                                   &#x3D; 0 ;
-reg   [6:0]  d                             &#x3D; 0 ;
+// fls Inputs
+reg   clk                                  = 0 ;
+reg   rst                                  = 1 ;    //先重置刀状态0
+reg   en                                   = 0 ;
+reg   [6:0]  d                             = 0 ;
 
-&#x2F;&#x2F; fls Outputs
+// fls Outputs
 wire  [6:0]  f                             ;
 wire  of                                   ;
 
 
 initial
 begin
-    forever #(PERIOD&#x2F;2)  clk&#x3D;~clk;
+    forever #(PERIOD/2)  clk=~clk;
 end
 
 initial
 begin
-    forever #20  en&#x3D;~en;
+    forever #20  en=~en;
 end
 
 fls  u_fls (
@@ -717,18 +715,18 @@ fls  u_fls (
 
 initial
 begin
-    #10 rst&#x3D;0;
-    #10 d&#x3D;7;    &#x2F;&#x2F;异或模式
-    #50 d&#x3D;55;
-    #50 d&#x3D;42;
-    #50 d&#x3D;3;
-    #550 rst&#x3D;1;
-    #30 rst&#x3D;0;
+    #10 rst=0;
+    #10 d=7;    //异或模式
+    #50 d=55;
+    #50 d=42;
+    #50 d=3;
+    #550 rst=1;
+    #30 rst=0;
     $finish;
 end
 
-endmodule<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-
+endmodule
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <h3 id="仿真结果"><a href="#仿真结果" class="headerlink" title="仿真结果"></a><span id="3.2">仿真结果</span></h3><p>加法模式：</p>
 <img src="/2023/04/05/22462/plus.png" class title="加法模式仿真图">
 
@@ -740,13 +738,13 @@ endmodule<span aria-hidden="true" class="line-numbers-rows"><span></span><span><
 
 <p>其他工作模式自行测试！</p>
 <h2 id="FPGA烧写"><a href="#FPGA烧写" class="headerlink" title="FPGA烧写"></a><span id="4">FPGA烧写</span></h2><p><strong>约束文件：</strong></p>
-<pre class="line-numbers language-V" data-language="V"><code class="language-V">## This file is a general .xdc for FPGAOL_BOARD (adopted from Nexys4 DDR Rev. C)
+<pre class="line-numbers language-V"><code class="language-V">## This file is a general .xdc for FPGAOL_BOARD (adopted from Nexys4 DDR Rev. C)
 ## To use it in a project:
 ## - uncomment the lines corresponding to used pins
 ## - rename the used ports (in each line, after get_ports) according to the top level signal names in the project
 
 ## Clock signal
-set_property -dict &#123; PACKAGE_PIN E3    IOSTANDARD LVCMOS33 &#125; [get_ports &#123; clk &#125;]; #IO_L12P_T1_MRCC_35 Sch&#x3D;clk100mhz
+set_property -dict &#123; PACKAGE_PIN E3    IOSTANDARD LVCMOS33 &#125; [get_ports &#123; clk &#125;]; #IO_L12P_T1_MRCC_35 Sch=clk100mhz
 #create_clock -add -name sys_clk_pin -period 10.00 -waveform &#123;0 5&#125; [get_ports &#123;CLK100MHZ&#125;];
 
 
@@ -784,18 +782,17 @@ set_property -dict &#123; PACKAGE_PIN H16   IOSTANDARD LVCMOS33 &#125; [get_port
 #set_property -dict &#123; PACKAGE_PIN B16   IOSTANDARD LVCMOS33 &#125; [get_ports &#123; hexplay_an[1] &#125;];
 #set_property -dict &#123; PACKAGE_PIN A18   IOSTANDARD LVCMOS33 &#125; [get_ports &#123; hexplay_an[2] &#125;];
 
-## FPGAOL BUTTON &amp; SOFT_CLOCK
+## FPGAOL BUTTON & SOFT_CLOCK
 
 set_property -dict &#123; PACKAGE_PIN B18   IOSTANDARD LVCMOS33 &#125; [get_ports &#123; en &#125;];
 
 ##USB-RS232 Interface
 
-#set_property -dict &#123; PACKAGE_PIN C4    IOSTANDARD LVCMOS33 &#125; [get_ports &#123; UART_TXD_IN &#125;]; #IO_L7P_T1_AD6P_35 Sch&#x3D;uart_txd_in
-#set_property -dict &#123; PACKAGE_PIN D4    IOSTANDARD LVCMOS33 &#125; [get_ports &#123; UART_RXD_OUT &#125;]; #IO_L11N_T1_SRCC_35 Sch&#x3D;uart_rxd_out
-#set_property -dict &#123; PACKAGE_PIN D3    IOSTANDARD LVCMOS33 &#125; [get_ports &#123; UART_CTS &#125;]; #IO_L12N_T1_MRCC_35 Sch&#x3D;uart_cts
-#set_property -dict &#123; PACKAGE_PIN E5    IOSTANDARD LVCMOS33 &#125; [get_ports &#123; UART_RTS &#125;]; #IO_L5N_T0_AD13N_35 Sch&#x3D;uart_rts
+#set_property -dict &#123; PACKAGE_PIN C4    IOSTANDARD LVCMOS33 &#125; [get_ports &#123; UART_TXD_IN &#125;]; #IO_L7P_T1_AD6P_35 Sch=uart_txd_in
+#set_property -dict &#123; PACKAGE_PIN D4    IOSTANDARD LVCMOS33 &#125; [get_ports &#123; UART_RXD_OUT &#125;]; #IO_L11N_T1_SRCC_35 Sch=uart_rxd_out
+#set_property -dict &#123; PACKAGE_PIN D3    IOSTANDARD LVCMOS33 &#125; [get_ports &#123; UART_CTS &#125;]; #IO_L12N_T1_MRCC_35 Sch=uart_cts
+#set_property -dict &#123; PACKAGE_PIN E5    IOSTANDARD LVCMOS33 &#125; [get_ports &#123; UART_RTS &#125;]; #IO_L5N_T0_AD13N_35 Sch=uart_rts
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-
 <p><strong>烧写:</strong><br>然后在Vivado中点击左下角PROGRAM AND DEBUG&#x2F;Generate Bitstream可生成bit文件，所在目录：工程文件夹&#x2F;.runs&#x2F;impl_1&#x2F;***.bit。将其烧写在<a target="_blank" rel="noopener" href="https://fpgaol.ustc.edu.cn/">FPGA在线平台</a>上即可远程控制真实的电路板。</p>
 
                 
@@ -1146,7 +1143,7 @@ set_property -dict &#123; PACKAGE_PIN B18   IOSTANDARD LVCMOS33 &#125; [get_port
             <br>
             
             &nbsp;<i class="fas fa-chart-area"></i>&nbsp;站点总字数:&nbsp;<span
-                class="white-color">1.7k</span>&nbsp;字
+                class="white-color">223</span>&nbsp;字
             
             
             
@@ -1434,6 +1431,6 @@ $(function () {
             setTimeout(function () { document.title = OriginTitile }, 3e3)) })
             
             </script>
-<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"log":false,"model":{"jsonPath":"/live2dw/assets/shizuku.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":true},"react":{"opacity":0.7}});</script></body>
+</body>
 
 </html>
